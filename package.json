@@ -13,6 +13,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "cross-env": "^6.0.3",
     "lite-server": "^2.3.0"
   }
 }

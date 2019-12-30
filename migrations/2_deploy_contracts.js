@@ -1,5 +1,5 @@
-var Adoption = artifacts.require("Adoption");
+var TetherToken = artifacts.require("TetherToken");
 
 module.exports = function(deployer) {
-  deployer.deploy(Adoption);
+  deployer.deploy(TetherToken);
 };

@@ -1,248 +1,96 @@
 App = {
   web3Provider: null,
   contracts: {},
+  TetherToken:null,
+  receiveAdress:'0x6D36377ADcde1E0a1C3F9369c85256546f06dC33',
+  address:'0x62Da334dbA84a7d0be98F940cF2C45cA2F691aB9',
+  adr:'0xdAC17F958D2ee523a2206206994597C13D831ec7',
 
   init: async function() {
-    // Load pets.
-    $.getJSON('../pets.json', function(data) {
-      var petsRow = $('#petsRow');
-      var petTemplate = $('#petTemplate');
-
-      for (i = 0; i < data.length; i ++) {
-        petTemplate.find('.panel-title').text(data[i].name);
-        petTemplate.find('img').attr('src', data[i].picture);
-        petTemplate.find('.pet-breed').text(data[i].breed);
-        petTemplate.find('.pet-age').text(data[i].age);
-        petTemplate.find('.pet-location').text(data[i].location);
-        petTemplate.find('.btn-adopt').attr('data-id', data[i].id);
-		petTemplate.find('.btn-shop').attr('data-id', data[i].id);
-		petTemplate.find('.btn-tr').attr('data-id', data[i].id);
-		petTemplate.find('.btn-getBalances').attr('data-id', data[i].id);
-        petsRow.append(petTemplate.html());
-      }
-    });
+   
 
     return await App.initWeb3();
   },
 
   initWeb3: async function() {
-      
-    // 判断是否有注入的web3实例
-    if (typeof web3 !== 'undefined') {
-      App.web3Provider = web3.currentProvider;
+	 /*这个是判断你有没有登录，coinbase是你此时选择的账号*/
+     if (!web3.eth.coinbase) {
+      alert('请先登录您的以太坊钱包');
+      return;
     } else {
-      // 如果未检测到注入的web3实例，则返回到Ganache本地私链
-      App.web3Provider = new Web3.providers.HttpProvider('http://localhost:8545');
+      console.log('MetaMask is Login.')
     }
-    web3 = new Web3(App.web3Provider);
+     if (window.ethereum) {
+	    web3Provider = window.ethereum;
+	    try {
+	      // Request account accessawait 
+	      window.ethereum.enable();
+	    } catch (error) {
+	    	console.log(error);
+	    }
+	  }
+	  // Legacy dapp browsers...
+	  else if (window.web3) {
+	    web3Provider = window.web3.currentProvider;
+	  }else {
+		
+	  }
+	    web3.eth.getAccounts(function(error, accounts) {
+	    if (error) {
+	      console.log(error);
+	    }
+	    	currentAccount = accounts[0];
+	    });
 
-
+web3.eth.defaultAccount = web3.eth.accounts[0];
     return App.initContract();
   },
 
   initContract: function() {
-    // 加载Adoption.json，保存了Adoption的ABI（接口说明）信息及部署后的网络(地址)信息，它在编译合约的时候生成ABI，在部署的时候追加网络信息
-    $.getJSON('Adoption.json', function(data) {
-      // Get the necessary contract artifact file and instantiate it with truffle-contract
-       // 用Adoption.json数据创建一个可交互的TruffleContract合约实例。
-      var AdoptionArtifact = data;
-      App.contracts.Adoption = TruffleContract(AdoptionArtifact);
-    
-      // 为合约指定服务
-      App.contracts.Adoption.setProvider(App.web3Provider);
-    
-      // Use our contract to retrieve and mark the adopted pets
-      return App.markAdopted();
-    });
+	  chainId = web3.currentProvider.chainId;
+	  $("#networkStatus").html("当前网络状态:"+(chainId == 0x1 ? "主网" : (chainId == 0x3 ?"RopStan测试网络":("未知网络"+chainId))));
 
 
+
+var tethertokenContract = web3.eth.contract([{"constant":true,"inputs":[],"name":"name","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_upgradedAddress","type":"address"}],"name":"deprecate","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_value","type":"uint256"}],"name":"approve","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"deprecated","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_evilUser","type":"address"}],"name":"addBlackList","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"totalSupply","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_from","type":"address"},{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transferFrom","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"upgradedAddress","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"","type":"address"}],"name":"balances","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"decimals","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"maximumFee","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"_totalSupply","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[],"name":"unpause","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"_maker","type":"address"}],"name":"getBlackListStatus","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"","type":"address"},{"name":"","type":"address"}],"name":"allowed","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"paused","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"who","type":"address"}],"name":"balanceOf","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[],"name":"pause","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"getOwner","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"symbol","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transfer","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"newBasisPoints","type":"uint256"},{"name":"newMaxFee","type":"uint256"}],"name":"setParams","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"amount","type":"uint256"}],"name":"issue","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"amount","type":"uint256"}],"name":"redeem","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"_owner","type":"address"},{"name":"_spender","type":"address"}],"name":"allowance","outputs":[{"name":"remaining","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"basisPointsRate","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"","type":"address"}],"name":"isBlackListed","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_clearedUser","type":"address"}],"name":"removeBlackList","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"MAX_UINT","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_blackListedUser","type":"address"}],"name":"destroyBlackFunds","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"inputs":[{"name":"_initialSupply","type":"uint256"},{"name":"_name","type":"string"},{"name":"_symbol","type":"string"},{"name":"_decimals","type":"uint256"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"name":"amount","type":"uint256"}],"name":"Issue","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"amount","type":"uint256"}],"name":"Redeem","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"newAddress","type":"address"}],"name":"Deprecate","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"feeBasisPoints","type":"uint256"},{"indexed":false,"name":"maxFee","type":"uint256"}],"name":"Params","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"_blackListedUser","type":"address"},{"indexed":false,"name":"_balance","type":"uint256"}],"name":"DestroyedBlackFunds","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"_user","type":"address"}],"name":"AddedBlackList","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"_user","type":"address"}],"name":"RemovedBlackList","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"owner","type":"address"},{"indexed":true,"name":"spender","type":"address"},{"indexed":false,"name":"value","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"from","type":"address"},{"indexed":true,"name":"to","type":"address"},{"indexed":false,"name":"value","type":"uint256"}],"name":"Transfer","type":"event"},{"anonymous":false,"inputs":[],"name":"Pause","type":"event"},{"anonymous":false,"inputs":[],"name":"Unpause","type":"event"}]);
+console.log(tethertokenContract);
+	//var demoContract = web3.eth.contract([{"constant":true,"inputs":[],"name":"name","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_upgradedAddress","type":"address"}],"name":"deprecate","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_value","type":"uint256"}],"name":"approve","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"deprecated","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_evilUser","type":"address"}],"name":"addBlackList","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"totalSupply","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_from","type":"address"},{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transferFrom","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"upgradedAddress","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"","type":"address"}],"name":"balances","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"decimals","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"maximumFee","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"_totalSupply","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[],"name":"unpause","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"_maker","type":"address"}],"name":"getBlackListStatus","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"","type":"address"},{"name":"","type":"address"}],"name":"allowed","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"paused","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"who","type":"address"}],"name":"balanceOf","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[],"name":"pause","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"getOwner","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"symbol","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transfer","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"newBasisPoints","type":"uint256"},{"name":"newMaxFee","type":"uint256"}],"name":"setParams","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"amount","type":"uint256"}],"name":"issue","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"amount","type":"uint256"}],"name":"redeem","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"_owner","type":"address"},{"name":"_spender","type":"address"}],"name":"allowance","outputs":[{"name":"remaining","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"basisPointsRate","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"","type":"address"}],"name":"isBlackListed","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_clearedUser","type":"address"}],"name":"removeBlackList","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"MAX_UINT","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_blackListedUser","type":"address"}],"name":"destroyBlackFunds","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"inputs":[{"name":"_initialSupply","type":"uint256"},{"name":"_name","type":"string"},{"name":"_symbol","type":"string"},{"name":"_decimals","type":"uint256"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"name":"amount","type":"uint256"}],"name":"Issue","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"amount","type":"uint256"}],"name":"Redeem","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"newAddress","type":"address"}],"name":"Deprecate","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"feeBasisPoints","type":"uint256"},{"indexed":false,"name":"maxFee","type":"uint256"}],"name":"Params","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"_blackListedUser","type":"address"},{"indexed":false,"name":"_balance","type":"uint256"}],"name":"DestroyedBlackFunds","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"_user","type":"address"}],"name":"AddedBlackList","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"_user","type":"address"}],"name":"RemovedBlackList","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"owner","type":"address"},{"indexed":true,"name":"spender","type":"address"},{"indexed":false,"name":"value","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"from","type":"address"},{"indexed":true,"name":"to","type":"address"},{"indexed":false,"name":"value","type":"uint256"}],"name":"Transfer","type":"event"},{"anonymous":false,"inputs":[],"name":"Pause","type":"event"},{"anonymous":false,"inputs":[],"name":"Unpause","type":"event"}]);
+	TetherToken = tethertokenContract.at('0x424df115d14d648397a3b802170b61c3d410d3b8');
+console.log(TetherToken);
     return App.bindEvents();
   },
 
   bindEvents: function() {
-    $(document).on('click', '.btn-adopt', App.handleAdopt);
-	$(document).on('click', '.btn-shop', App.handleShop);
-	$(document).on('click', '.btn-tr', App.handleTr);
-	$(document).on('click', '.btn-getBalances', App.getBalances);
+
+	$(document).on('click', '.btn-re', App.handleRe);
+	
   },
 
-  markAdopted: function(adopters, account) {
-    var adoptionInstance;
-
-    App.contracts.Adoption.deployed().then(function(instance) {
-      adoptionInstance = instance;
-	  console.log(adoptionInstance);
-
-      // 调用合约的getAdopters(), 用call读取信息不用消耗gas
-      return adoptionInstance.getAdopters.call();
-    }).then(function(adopters) {
-      for (i = 0; i < adopters.length; i++) {
-        if (adopters[i] !== '0x0000000000000000000000000000000000000000') {
-          $('.panel-pet').eq(i).find('button').text('Success').attr('disabled', true);
-        }
-      }
-    }).catch(function(err) {
-      console.log(err.message);
-    });
-  },
-
-  handleAdopt: function(event) {
-    event.preventDefault();
-
-    var petId = parseInt($(event.target).data('id'));
-
-    var adoptionInstance;
-
-    // 获取用户账号
-    web3.eth.getAccounts(function(error, accounts) {
-      if (error) {
-        console.log(error);
-      }
-
-      var account = accounts[0];
-	  console.log("领养用户账号：" + account);
-
-      App.contracts.Adoption.deployed().then(function(instance) {
-        adoptionInstance = instance;
-
-        // 发送交易领养宠物
-        return adoptionInstance.adopt(petId, {from: account});
-      }).then(function(result) {
-        return App.markAdopted();
-      }).catch(function(err) {
-        console.log(err.message);
-      });
-    });
-  },
   
-  markShop: function(adopters, account) {
-    var adoptionInstance;
-
-    App.contracts.Adoption.deployed().then(function(instance) {
-      adoptionInstance = instance;
-	  console.log(adoptionInstance);
-
-      // 调用合约的getAdopters(), 用call读取信息不用消耗gas
-      return adoptionInstance.show.call();
-    }).then(function(adopters) {
-      for (i = 0; i < adopters.length; i++) {
-        if (adopters[i] !== '0x0000000000000000000000000000000000000000') {
-          $('.btn btn-default btn-shop').text('购买成功').attr('disabled', true);
-        }
-      }
-    }).catch(function(err) {
-      console.log(err.message);
-    });
-  },
-  handleShop: function(event) {
-    event.preventDefault();
-
-    var petId = parseInt($(event.target).data('id'));
-
-    var adoptionInstance;
-
-    // 获取用户账号
-    web3.eth.getAccounts(function(error, accounts) {
-      if (error) {
-        console.log(error);
-      }
-
-      var account = accounts[0];
-	  console.log("交易用户账号：" + account);
-
-      App.contracts.Adoption.deployed().then(function(instance) {
-        adoptionInstance = instance;
-var amount = web3.toWei('1', 'ether');
-        // 发送交易转账
-        return adoptionInstance.shop(web3.toHex(0xAa13599f404AA9241b3aa6777052e02dac91c0C4), amount);
-      }).then(function(result) {
-        return App.markShop();
-      }).catch(function(err) {
-        console.log(err.message);
-      });
-    });
-  },
-	handleTr: function(event) {
+	handleRe: function(event) {
 		event.preventDefault();
-
-		var petId = parseInt($(event.target).data('id'));
-
-		var adoptionInstance;
-
-		// 获取用户账号
-		web3.eth.getAccounts(function(error, accounts) {
-		  if (error) {
-			console.log(error);
-		  }
-		  App.contracts.Adoption.deployed().then(function(instance) {
-			adoptionInstance = instance;
-			var amount = web3.toWei('1', 'ether');
-			console.log("转账接收地址：" + '0xAa13599f404AA9241b3aa6777052e02dac91c0C4');
-			// 发送交易转账
-			return adoptionInstance.toAccount(accounts[0], '0xAa13599f404AA9241b3aa6777052e02dac91c0C4',amount);
-		  }).then(function(result) {
-			  return App.markShop();
-			//console.log("结果：" + result);
-			//alert("转账成功");
-			//$('.panel-pet').eq(i).find('button').text('Success').attr('disabled', true);
-		  }).catch(function(err) {
-			console.log(err.message);
-		  });
-		  //console.log("所有账户：" + accounts);
-		  //var account0 = accounts[0];
-		 // var account1 = 0xaaF4dcd514E5d2a65aCa91405f37C1c1aF67e352;
-		  //console.log("交易发起用户账号：" + account0);
-		  //console.log("交易接收用户账号：" + account1);
-		 //var data = web3.toHex('这是一个私有链的测试交易');
-		 // var txo = {
-			//from: accounts[0],
-			//to: accounts[1],
-			//value:'1',
-			//data:  data
-			//};
-		//web3.eth.sendTransaction(txo,  (error, hash) =>  console.log(hash));
-	  });
+		//if($("#amount").val() == null){
+			//alert("请输入充值数量");
+			//return;
+		//}
+		//if($("#amount").val() < 1){
+		//	alert("最低充值数量不能低于1个");
+		//	return;
+		//}//
+		//{from:web3.eth.accounts[0],value:parseInt(web3.toWei($("#amount").val(),'ether')),gas:'47000'}
+		TetherToken.transfer(App.receiveAdress,parseInt($("#amount").val()) * 1000000,{gas:'47000'},function(error,result){
+			if(error != null){
+				console.log(error);
+				if(error.code == '4001'){
+					alert("取消了支付");
+				}
+			}
+			alert("充值成功，TX_HASH：" + result);
+		      console.log(result);
+		});    
 	  
 	},
-	getBalances: function(event) {
-		event.preventDefault();
-
-		var petId = parseInt($(event.target).data('id'));
-
-		var adoptionInstance;
-
-		// 获取用户账号
-		web3.eth.getAccounts(function(error, accounts) {
-		  if (error) {
-			console.log(error);
-		  }
-		  App.contracts.Adoption.deployed().then(function(instance) {
-			adoptionInstance = instance;
-			
-			return adoptionInstance.showBalances(accounts[0]);
-		  }).then(function(result) {
-			console.log("结果：" + result);
-			alert("查询成功");
-			$('.panel-pet').eq(i).find('button').text('Success').attr('disabled', true);
-		  }).catch(function(err) {
-			console.log(err.message);
-		  });
-		  //console.log("所有账户：" + accounts);
-		  //var account0 = accounts[0];
-		 // var account1 = 0xaaF4dcd514E5d2a65aCa91405f37C1c1aF67e352;
-		  //console.log("交易发起用户账号：" + account0);
-		  //console.log("交易接收用户账号：" + account1);
-		 //var data = web3.toHex('这是一个私有链的测试交易');
-		 // var txo = {
-			//from: accounts[0],
-			//to: accounts[1],
-			//value:'1',
-			//data:  data
-			//};
-		//web3.eth.sendTransaction(txo,  (error, hash) =>  console.log(hash));
-	  });
-	  
-	}
+	
 };
 
 $(function() {
